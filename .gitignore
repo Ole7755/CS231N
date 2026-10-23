@@ -1,0 +1,32 @@
+# Local Python/Jupyter environments and caches
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+.pytest_cache/
+.DS_Store
+.vscode/
+
+# Downloaded datasets (keep the course download scripts)
+assignment*/cs231n/datasets/*
+!assignment*/cs231n/datasets/*.sh
+assignment*/data/
+
+# Trained weights, generated results and submission bundles
+assignment*/cs231n/saved/
+assignment*/cs231n/exp/
+assignment*/pretrained_model/
+assignment*/results/
+assignment*/dino_res.mp4
+assignment*/*_submission.zip
+assignment*/*_submission.pdf
+
+# Platform-specific Cython build products
+build/
+*.so
+*.pyd
+assignment2/cs231n/im2col_cython.c
+*.part
+
+test.py

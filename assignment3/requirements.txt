@@ -1,0 +1,2 @@
+# Shared dependencies for the entire repository; use Python 3.11.
+-r ../requirements.txt
