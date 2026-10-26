@@ -11,6 +11,16 @@ import zipfile
 
 
 REPO_ROOT = Path(__file__).resolve().parent
+DATASET_DIR = REPO_ROOT / "dataset"
+
+
+def _link_dataset(assignment_dir, filename):
+    """Keep the course's original paths pointing at the shared dataset."""
+    target = DATASET_DIR / filename
+    link = Path(assignment_dir) / "cs231n" / "datasets" / filename
+    link.parent.mkdir(parents=True, exist_ok=True)
+    if not link.exists() and not link.is_symlink():
+        link.symlink_to(os.path.relpath(target, link.parent), target_is_directory=target.is_dir())
 
 
 def download_file(url, destination):
@@ -38,7 +48,8 @@ def download_file(url, destination):
 
 def ensure_dataset(assignment_dir, name):
     """Fetch the course CIFAR-10 or COCO archive only when files are missing."""
-    datasets_dir = Path(assignment_dir) / "cs231n" / "datasets"
+    datasets_dir = DATASET_DIR
+    datasets_dir.mkdir(parents=True, exist_ok=True)
     if name == "cifar10":
         directory = datasets_dir / "cifar-10-batches-py"
         required = [f"data_batch_{i}" for i in range(1, 6)] + ["test_batch", "batches.meta"]
@@ -57,7 +68,12 @@ def ensure_dataset(assignment_dir, name):
         raise ValueError(f"Unknown dataset: {name}")
 
     if not all((directory / filename).is_file() for filename in required):
-        archive = download_file(url, datasets_dir / archive_name)
+        # Reuse an archive downloaded with the previous per-assignment layout.
+        legacy_archive = Path(assignment_dir) / "cs231n" / "datasets" / archive_name
+        archive = (
+            legacy_archive if legacy_archive.is_file()
+            else download_file(url, datasets_dir / archive_name)
+        )
         print(f"Extracting {archive.name} ...", flush=True)
         if name == "cifar10":
             with tarfile.open(archive) as source:
@@ -71,6 +87,7 @@ def ensure_dataset(assignment_dir, name):
         missing = [filename for filename in required if not (directory / filename).is_file()]
         if missing:
             raise FileNotFoundError(f"Incomplete {name} dataset at {directory}: {missing}")
+    _link_dataset(assignment_dir, directory.name)
     return directory
 
 
@@ -82,6 +99,17 @@ def setup_assignment(number, datasets=()):
         assignment_dir = REPO_ROOT
     if not (assignment_dir / "cs231n").is_dir():
         raise FileNotFoundError(f"Assignment directory not found: {assignment_dir}")
+    for filename in ("cifar-10-batches-py", "imagenet_val_25.npz", "coco_captioning"):
+        if (DATASET_DIR / filename).exists():
+            _link_dataset(assignment_dir, filename)
+    if number == 3 and (DATASET_DIR / "cifar-10-batches-py").is_dir():
+        data_link = assignment_dir / "data" / "cifar-10-batches-py"
+        data_link.parent.mkdir(parents=True, exist_ok=True)
+        if not data_link.exists() and not data_link.is_symlink():
+            data_link.symlink_to(
+                os.path.relpath(DATASET_DIR / "cifar-10-batches-py", data_link.parent),
+                target_is_directory=True,
+            )
     loaded = sys.modules.get("cs231n")
     if loaded is not None and Path(loaded.__file__).resolve().parent != assignment_dir / "cs231n":
         raise RuntimeError(

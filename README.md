@@ -23,4 +23,20 @@ python -m ipykernel install --sys-prefix --name cs231n --display-name "Python (c
 jupyter lab
 ```
 
+## 数据集目录
+
+三个作业共享项目根目录下的 `dataset/`，数据文件不提交到 Git：
+
+```text
+dataset/
+├── cifar-10-batches-py/   # CIFAR-10
+├── imagenet_val_25.npz   # ImageNet 验证集的 25 张示例图片
+└── coco_captioning/      # 运行相关 notebook 时按需下载
+```
+
+各作业 `cs231n/datasets/` 中保留指向共享数据的相对符号链接，因此现有
+notebook 的读取路径仍然可用。作业 3 的 `data/cifar-10-batches-py` 也指向同一份
+CIFAR-10，供 torchvision 使用。通过 `notebook_utils.ensure_dataset` 下载的数据
+会存入共享目录。
+
 

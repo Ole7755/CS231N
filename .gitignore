@@ -9,6 +9,7 @@ __pycache__/
 .vscode/
 
 # Downloaded datasets (keep the course download scripts)
+/dataset/
 assignment*/cs231n/datasets/*
 !assignment*/cs231n/datasets/*.sh
 assignment*/data/
